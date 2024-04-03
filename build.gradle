@@ -19,7 +19,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'com.palantir.docker'
 
 jar {
-    baseName='orion-data'
+    baseName='miktmc-uploader-data'
     version= '4.0'
 }
 
