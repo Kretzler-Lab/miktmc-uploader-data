@@ -96,6 +96,12 @@ public class PackageTest {
         assertEquals("study", testPackage.getStudy());
     }
 
+    @Test
+    public void testSetBiopsyId() throws Exception {
+        testPackage.setBiopsyId("asdf-1");
+        assertEquals("asdf-1", testPackage.getBiopsyId());
+    }
+
 	@Test
 	public void testToString() throws Exception {
 		Date createdAt = new Date();
@@ -109,6 +115,7 @@ public class PackageTest {
 		packageInfo.setProtocol("protocol");
 		packageInfo.setSubjectId("subjectId");
         packageInfo.setStudy("study");
+        packageInfo.setBiopsyId("biopsyId");
 		User user = new User();
 		user.setId("1234");
 		packageInfo.setSubmitter(user);
@@ -116,7 +123,7 @@ public class PackageTest {
 		assertEquals(
 				"packageId: packageId, packageType: packageType, createdAt: " + createdAt + ", " + "submitterId: 1234, "
 						+ "protocol: protocol, subjectId: subjectId, experimentDate: null, description: description, "
-						+ "siteName: siteName, study: study, number of attachments: 1",
+						+ "siteName: siteName, study: study, biopsyId: biopsyId, number of attachments: 1",
 				packageInfo.toString());
 	}
 

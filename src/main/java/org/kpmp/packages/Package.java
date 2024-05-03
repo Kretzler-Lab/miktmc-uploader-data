@@ -29,6 +29,7 @@ public class Package {
 	private Date experimentDate;
 	private String description;
     private String study;
+    private String biopsyId;
     @DBRef(lazy = false)
 	private User submitter;
 	@Nullable
@@ -135,12 +136,20 @@ public class Package {
 		this.submitter = submitter;
 	}
 
+    public String getBiopsyId(){
+        return biopsyId;
+    }
+
+    public void setBiopsyId(String biopsyId){
+        this.biopsyId = biopsyId;
+    }
+
 	@Override
 	public String toString() {
 		return "packageId: " + packageId + ", packageType: " + packageType + ", createdAt: " + createdAt
 				+ ", submitterId: " + submitter.getId() + ", protocol: " + protocol + ", subjectId: " + subjectId
 				+ ", experimentDate: " + experimentDate + ", description: " + description + ", siteName: " + siteName
-                + ", study: " + study
+                + ", study: " + study + ", biopsyId: " + biopsyId
 				+ ", number of attachments: " + attachments.size();
 	}
 
