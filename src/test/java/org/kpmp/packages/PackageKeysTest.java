@@ -43,6 +43,7 @@ public class PackageKeysTest {
 		assertEquals("siteCuregnDiabetes", PackageKeys.CUREGN_DIABETES_SITE.getKey());
 		assertEquals("siteNeptune", PackageKeys.NEPTUNE_SITE.getKey());
 		assertEquals("site", PackageKeys.SITE.getKey());
+        assertEquals("biopsyId", PackageKeys.BIOPSY_ID.getKey());
 	}
 
 }
