@@ -15,7 +15,7 @@ import org.springframework.lang.Nullable;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @Document(collection = "packages")
-@JsonPropertyOrder({ "packageId", "createdAt", "packageType", "submitter", "tisName", "protocol", "subjectId",
+@JsonPropertyOrder({ "packageId", "biopsyId", "createdAt", "packageType", "submitter", "tisName", "protocol", "subjectId",
 		"experimentDate", "description", "attachments" })
 public class Package {
 
