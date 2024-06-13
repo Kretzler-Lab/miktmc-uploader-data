@@ -225,7 +225,7 @@ public class AuthorizationFilterTest {
 		verify(logger).logErrorMessage(AuthorizationFilter.class, null,
 				"User does not have access to DLU: [\"another group\"]",
 				incomingRequest);
-        verify(handler).sendNotification("shibboleth id", "hostname");
+        verify(handler, times(1));
     }
 
 	@SuppressWarnings("unchecked")

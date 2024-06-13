@@ -18,10 +18,10 @@ class NotificationHandler {
 		this.restTemplate = restTemplate;
 	}
 
-	public void sendNotification(String userId, String origin) {
+	public void sendNotification(NotificationEvent event) {
 
 		restTemplate.postForObject(notificationServiceHost + notificationEndpoint,
-				new NotificationEvent(userId, origin), Boolean.class);
+				new NotificationEvent(event.getUserId(), event.getOrigin()), Boolean.class);
 
 	}
 

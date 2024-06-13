@@ -2,6 +2,9 @@ package org.kpmp.filters;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -14,9 +17,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.kpmp.Notification.NotificationEvent;
 import org.kpmp.logging.LoggingService;
 import org.kpmp.shibboleth.ShibbolethUserService;
 import org.kpmp.users.User;
@@ -82,6 +89,22 @@ public class AuthorizationFilter implements Filter {
 		HttpServletRequest request = (HttpServletRequest) incomingRequest;
 		HttpServletResponse response = (HttpServletResponse) incomingResponse;
 
+		CacheLoader<NotificationEvent, String> loader;
+
+		loader = new CacheLoader<NotificationEvent, String>() {
+			@Override
+			public String load(NotificationEvent notification) throws Exception {
+				notificationHandler.sendNotification(notification);
+				return notification.getOrigin();
+			}
+
+		};
+
+		LoadingCache<NotificationEvent, String> cache;
+		cache = CacheBuilder.newBuilder()
+				.expireAfterAccess(5, TimeUnit.MINUTES)
+				.build(loader);
+
 		Cookie[] cookies = request.getCookies();
 		User user = shibUserService.getUser(request);
 		String shibId = user.getShibId();
@@ -107,11 +130,11 @@ public class AuthorizationFilter implements Filter {
 						chain.doFilter(request, response);
 					} else {
 						handleError(USER_NO_DLU_ACCESS + userGroups, HttpStatus.NOT_FOUND, request, response);
-                        notificationHandler.sendNotification(shibId, userAuthHost);
+						cache.get(new NotificationEvent(shibId, userAuthHost));
 					}
 
 
-				} catch (JSONException e) {
+				} catch (JSONException | ExecutionException e) {
 					handleError("Unable to parse response from User Portal, denying user " + shibId
 							+ " access.  Response: " + userInfo, HttpStatus.FAILED_DEPENDENCY, request, response);
 
@@ -121,7 +144,11 @@ public class AuthorizationFilter implements Filter {
 				int statusCode = e.getRawStatusCode();
 				if (statusCode == HttpStatus.NOT_FOUND.value()) {
 					handleError(USER_DOES_NOT_EXIST + shibId, HttpStatus.NOT_FOUND, request, response);
-                    notificationHandler.sendNotification(shibId, userAuthHost);
+					try {
+						cache.get(new NotificationEvent(shibId, userAuthHost));
+					} catch (ExecutionException ex) {
+						throw new RuntimeException(ex);
+					}
 				} else if (statusCode != HttpStatus.OK.value()) {
 					handleError("Unable to get user information. User auth returned status code: " + statusCode,
 							HttpStatus.FAILED_DEPENDENCY, request, response);
