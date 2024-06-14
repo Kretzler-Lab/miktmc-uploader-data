@@ -43,8 +43,9 @@ public class NotificationHandlerTest {
 
         when(restTemplate.postForObject(any(String.class), any(NotificationEvent.class), any(Class.class)))
 				.thenReturn(true);
-        
-        handler.sendNotification(user.getShibId(), "origin");
+
+        NotificationEvent event = new NotificationEvent(user.getShibId(), "origin");
+        handler.sendNotification(event);
 
         ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<NotificationEvent> eventCaptor = ArgumentCaptor.forClass(NotificationEvent.class);

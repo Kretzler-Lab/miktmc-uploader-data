@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -15,9 +16,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.kpmp.Notification.NotificationEvent;
 import org.kpmp.Notification.NotificationHandler;
 import org.kpmp.logging.LoggingService;
 import org.kpmp.shibboleth.ShibbolethUserService;
@@ -44,6 +49,7 @@ public class AuthorizationFilterTest {
 	private Environment env;
     @Mock
     private NotificationHandler handler;
+	private LoadingCache<NotificationEvent, String> cache;
 
 	@Before
 	public void setUp() throws Exception {
@@ -53,6 +59,20 @@ public class AuthorizationFilterTest {
 		ReflectionTestUtils.setField(filter, "userAuthEndpoint", "endpoint");
 		ReflectionTestUtils.setField(filter, "allowedGroups", Arrays.asList("group1", "group2"));
 		ReflectionTestUtils.setField(filter, "allowedEndpoints", Arrays.asList("uri1"));
+		NotificationEvent event = new NotificationEvent("user", "host");
+		when(handler.sendNotification(event)).thenReturn("user");
+			CacheLoader<NotificationEvent, String> loader = new CacheLoader<NotificationEvent, String>() {
+			@Override
+			public String load(NotificationEvent notification) throws Exception {
+				return handler.sendNotification(event);
+			}
+
+		};
+
+		cache = CacheBuilder.newBuilder()
+				.expireAfterAccess(20, TimeUnit.MINUTES)
+				.build(loader);
+		ReflectionTestUtils.setField(filter, "cache", cache);
 	}
 
 	@After
@@ -217,7 +237,6 @@ public class AuthorizationFilterTest {
 		ResponseEntity<String> response = mock(ResponseEntity.class);
 		when(response.getBody()).thenReturn("{groups: [ 'another group'], active: true}");
 		when(restTemplate.getForEntity(any(String.class), any(Class.class))).thenReturn(response);
-
         filter.doFilter(incomingRequest, incomingResponse, chain);
 
         verify(chain, times(0)).doFilter(incomingRequest, incomingResponse);
@@ -225,7 +244,9 @@ public class AuthorizationFilterTest {
 		verify(logger).logErrorMessage(AuthorizationFilter.class, null,
 				"User does not have access to DLU: [\"another group\"]",
 				incomingRequest);
-        verify(handler, times(1));
+
+		filter.doFilter(incomingRequest, incomingResponse, chain);
+		verify(handler, times(1)).sendNotification(any(NotificationEvent.class));
     }
 
 	@SuppressWarnings("unchecked")
