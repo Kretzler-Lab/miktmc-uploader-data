@@ -245,6 +245,7 @@ public class AuthorizationFilterTest {
 				"User does not have access to DLU: [\"another group\"]",
 				incomingRequest);
 
+		//Do the filter again to make sure the notifications are only sent once.
 		filter.doFilter(incomingRequest, incomingResponse, chain);
 		verify(handler, times(1)).sendNotification(any(NotificationEvent.class));
     }
@@ -304,6 +305,7 @@ public class AuthorizationFilterTest {
 
 		verify(logger).logInfoMessage(AuthorizationFilter.class, null, null, "AuthorizationFilter.destroy",
 				"Destroying filter: AuthorizationFilter");
+		cache = null;
 	}
 
 }
