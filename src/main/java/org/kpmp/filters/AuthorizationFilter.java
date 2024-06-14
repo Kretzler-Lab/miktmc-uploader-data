@@ -65,6 +65,7 @@ public class AuthorizationFilter implements Filter {
 	@Value("#{'${user.auth.allow.endpoints}'.split(',')}")
 	private List<String> allowedEndpoints;
 	private Environment env;
+	private LoadingCache<NotificationEvent, String> cache;
 
 	@Autowired
 	public AuthorizationFilter(LoggingService logger, ShibbolethUserService shibUserService, RestTemplate restTemplate,
@@ -80,6 +81,17 @@ public class AuthorizationFilter implements Filter {
 	public void init(FilterConfig filterConfig) throws ServletException {
 		logger.logInfoMessage(this.getClass(), null, null, this.getClass().getSimpleName() + ".init",
 				"Initializing filter: " + this.getClass().getSimpleName());
+		CacheLoader<NotificationEvent, String> loader = new CacheLoader<NotificationEvent, String>() {
+			@Override
+			public String load(NotificationEvent notification) throws Exception {
+				return notificationHandler.sendNotification(notification);
+			}
+
+		};
+
+		cache = CacheBuilder.newBuilder()
+				.expireAfterAccess(5, TimeUnit.MINUTES)
+				.build(loader);
 	}
 
 	@Override
@@ -88,21 +100,6 @@ public class AuthorizationFilter implements Filter {
 
 		HttpServletRequest request = (HttpServletRequest) incomingRequest;
 		HttpServletResponse response = (HttpServletResponse) incomingResponse;
-
-		CacheLoader<NotificationEvent, String> loader;
-
-		loader = new CacheLoader<NotificationEvent, String>() {
-			@Override
-			public String load(NotificationEvent notification) throws Exception {
-				return notificationHandler.sendNotification(notification);
-			}
-
-		};
-
-		LoadingCache<NotificationEvent, String> cache;
-		cache = CacheBuilder.newBuilder()
-				.expireAfterAccess(5, TimeUnit.MINUTES)
-				.build(loader);
 
 		Cookie[] cookies = request.getCookies();
 		User user = shibUserService.getUser(request);
