@@ -90,7 +90,7 @@ public class AuthorizationFilter implements Filter {
 		};
 
 		cache = CacheBuilder.newBuilder()
-				.expireAfterAccess(5, TimeUnit.MINUTES)
+				.expireAfterAccess(20, TimeUnit.MINUTES)
 				.build(loader);
 	}
 
