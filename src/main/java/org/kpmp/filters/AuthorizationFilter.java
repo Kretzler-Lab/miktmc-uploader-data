@@ -94,8 +94,7 @@ public class AuthorizationFilter implements Filter {
 		loader = new CacheLoader<NotificationEvent, String>() {
 			@Override
 			public String load(NotificationEvent notification) throws Exception {
-				notificationHandler.sendNotification(notification);
-				return notification.getOrigin();
+				return notificationHandler.sendNotification(notification);
 			}
 
 		};
