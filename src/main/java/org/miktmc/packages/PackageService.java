@@ -158,6 +158,7 @@ public class PackageService {
 		logger.logInfoMessage(PackageService.class, null, null, null, "there are " + newFiles.length() + " files");
 		// Remove any files that have already been uploaded.
 		for (int i=0; i < newFiles.length(); i++) {
+			logger.logInfoMessage(PackageService.class, null, null, null, "check " + i);
 			JSONObject file = newFiles.getJSONObject(i);
 			String originalFileName = file.getString(PackageKeys.FILE_NAME.getKey());
 			logger.logInfoMessage(PackageService.class, null, null, null, "checking " + originalFileName);
