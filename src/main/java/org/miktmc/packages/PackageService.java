@@ -165,6 +165,7 @@ public class PackageService {
 				logger.logInfoMessage(PackageService.class, null, null, null, "removing " + originalFileName);
 			}
 		}
+		logger.logInfoMessage(PackageService.class, null, null, null, "there are " + newFiles.length() + " files");
 		packageRepository.setRenamedFiles(newFiles, thePackage.getStudy(), thePackage.getBiopsyId());
 		for (int i=0; i < newFiles.length(); i++) {
 			JSONObject file = newFiles.getJSONObject(i);
