@@ -159,10 +159,10 @@ public class PackageService {
 		for (int i=0; i < newFiles.length(); i++) {
 			JSONObject file = newFiles.getJSONObject(i);
 			String originalFileName = file.getString(PackageKeys.FILE_NAME.getKey());
-			logger.logInfoMessage(null, null, null, null, "checking " + originalFileName);
+			logger.logInfoMessage(PackageService.class, null, null, null, "checking " + originalFileName);
 			if (filenames.contains(originalFileName)) {
 				newFiles.remove(i);
-				logger.logInfoMessage(null, null, null, null, "removing " + originalFileName);
+				logger.logInfoMessage(PackageService.class, null, null, null, "removing " + originalFileName);
 			}
 		}
 		packageRepository.setRenamedFiles(newFiles, thePackage.getStudy(), thePackage.getBiopsyId());
