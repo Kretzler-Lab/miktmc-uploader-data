@@ -155,6 +155,7 @@ public class PackageService {
 		Package thePackage = findPackage(packageId);
 		List<Attachment> files = thePackage.getAttachments();
 		List<String> filenames = thePackage.getOriginalFilenames();
+		logger.logInfoMessage(PackageService.class, null, null, null, "there are " + newFiles.length() + " files");
 		// Remove any files that have already been uploaded.
 		for (int i=0; i < newFiles.length(); i++) {
 			JSONObject file = newFiles.getJSONObject(i);
