@@ -1,6 +1,6 @@
 package org.miktmc.packages;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
@@ -16,9 +16,9 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.miktmc.users.User;
 import org.miktmc.logging.LoggingService;
 
@@ -47,7 +47,7 @@ public class PackageServiceTest {
 	private StateHandlerService stateHandlerService;
 	private AutoCloseable mocks;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		mocks = MockitoAnnotations.openMocks(this);
 		service = new PackageService(packageFileHandler, filePathHelper, packageRepository, stateHandlerService, logger);
@@ -56,7 +56,7 @@ public class PackageServiceTest {
         ReflectionTestUtils.setField(service, "basePath", "/data/dataLake");
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		mocks.close();
 		service = null;
@@ -283,7 +283,8 @@ public class PackageServiceTest {
         newPackage.setStudy(studyDir);
 		when(filePathHelper.getFilePath("1234", studyDir, "file1")).thenReturn(file1Path);
 		when(filePathHelper.getFilePath("1234", studyDir, "file2")).thenReturn(file2Path);
-		service.calculateChecksums(newPackage);
+        when(packageRepository.findByPackageId(newPackage.getPackageId())).thenReturn(newPackage);
+		service.calculateChecksums(newPackage.getPackageId());
 		List<Attachment> attachments1 = newPackage.getAttachments();
 		assertNotNull(attachments1.get(0).getMd5checksum());
 		assertNotNull(attachments1.get(1).getMd5checksum());
