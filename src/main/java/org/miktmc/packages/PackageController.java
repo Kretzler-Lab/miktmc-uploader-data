@@ -114,6 +114,7 @@ public class PackageController {
 			packageInfo = new JSONObject(packageInfoString);
 			JSONArray jsonFiles = packageInfo.getJSONArray("files");
 			files = packageService.addFiles(packageId, jsonFiles, shibId, false);
+            packageService.stripMetadata(packageService.findPackage(packageId));
 		} catch (Exception e) {
 			logger.logErrorMessage(this.getClass(), packageId, e.getMessage(), request);
 			packageService.sendStateChangeEvent(packageId, uploadFailedState, null, e.getMessage(), hostname);
@@ -143,6 +144,7 @@ public class PackageController {
 			if (didDelete) {
 				try {
 					packageService.addFiles(packageId, jsonFiles, shibId, true);
+                    packageService.stripMetadata(packageService.findPackage(packageId));
 					response.setSuccess(true);
 				} catch (Exception e) {
 					logger.logErrorMessage(this.getClass(), packageId, e.getMessage(), request);
@@ -200,8 +202,8 @@ public class PackageController {
 		logger.logInfoMessage(this.getClass(), packageId, message, request);
 		if (packageService.validatePackage(packageId, shibUserService.getUser(request))) {
 			try {
+				packageService.setPackageValidated(packageId);
                 packageService.stripMetadata(packageService.findPackage(packageId));
-				// packageService.calculateAndSaveChecksums(packageId);
 				fileUploadResponse = new FileUploadResponse(true);
 				packageService.sendStateChangeEvent(packageId, uploadSucceededState, null, cleanHostName);
 			} catch (Exception e) {

@@ -14,7 +14,7 @@ plugins {
 }
 
 group = 'kretzlerdevs'
-version = "1.2"
+version = "1.3"
 
 
 apply plugin: 'java'
@@ -26,7 +26,7 @@ apply plugin: 'com.palantir.docker'
 
 jar {
     archiveBaseName='miktmc-uploader-data'
-    version= '1.2'
+    version= '1.3'
 }
 
 repositories {
