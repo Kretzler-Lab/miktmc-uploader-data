@@ -102,6 +102,23 @@ public class PackageControllerTest {
 		verify(packageService).sendStateChangeEvent("universalId", "UPLOAD_FAILED", null, "FAIL", "hostname");
 	}
 
+    @Test
+	public void testPostPackageInformation_whenDuplicateBiopsyIdException() throws Exception {
+		String packageInfoString = "{\"packageType\":\"blah\", \"biopsyId\":\"1234\"}";
+		when(universalIdGenerator.generateUniversalId()).thenReturn("universalId");
+		when(packageService.savePackageInformation(any(JSONObject.class), any(User.class), any(String.class)))
+				.thenThrow(new JSONException("ERROR: Package with biopsyId 1234 for package type typeOfPackage already exists."));
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		User user = mock(User.class);
+		when(shibUserService.getUserNoHeaders(any(HttpServletRequest.class), any(JSONObject.class))).thenReturn(user);
+
+		PackageResponse response = controller.postPackageInformation(packageInfoString, "hostname", request);
+
+		assertEquals(null, response.getGlobusURL());
+		verify(logger).logErrorMessage(PackageController.class, "universalId", "ERROR: Package with biopsyId 1234 for package type blah already exists.", request);
+		verify(packageService).sendStateChangeEvent("universalId", "UPLOAD_FAILED", null, "ERROR: Package with biopsyId 1234 for package type blah already exists.", "hostname");
+	}
+
 	@Test
 	public void testPostPackageInformation() throws Exception {
 		String packageInfoString = "{\"packageType\":\"blah\"}";

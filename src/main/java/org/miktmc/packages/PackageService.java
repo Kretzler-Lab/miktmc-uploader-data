@@ -2,13 +2,9 @@ package org.miktmc.packages;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.*;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -107,10 +103,34 @@ public class PackageService {
         return successCode;
     }
 
+    public Package findPackageByBiopsyIdAndPackageTypeAndStudy(String biopsyId, String packageType, String study) {
+        return packageRepository.findByBiopsyIdAndPackageTypeAndStudy(biopsyId, packageType, study);
+    }
+
 	public String savePackageInformation(JSONObject packageMetadata, User user, String packageId) throws JSONException {
-		packageRepository.saveDynamicForm(packageMetadata, user, packageId);
-		Package myPackage = packageRepository.findByPackageId(packageId);
-		return myPackage.getPackageId();
+        String biopsyId = packageMetadata.getString(PackageKeys.BIOPSY_ID.getKey());
+        String submittedPackageType = packageMetadata.getString(PackageKeys.PACKAGE_TYPE.getKey());
+        String submittedStudy = packageMetadata.getString(PackageKeys.STUDY.getKey());
+        
+        Package myPackage = packageRepository.findByBiopsyIdAndPackageTypeAndStudy(biopsyId, submittedPackageType, submittedStudy);
+        
+        try {
+            if (myPackage == null) {
+                packageRepository.saveDynamicForm(packageMetadata, user, packageId);
+                Package thePackage = packageRepository.findByPackageId(packageId);
+                return thePackage.getPackageId();
+    
+            }else {
+                String errorMessage = "Package with biopsyId " + biopsyId + " for Upload type " + submittedPackageType + " for study " + submittedStudy + " already exists.";
+                logger.logErrorMessage(getClass(), packageId, errorMessage);
+                return "ERROR: Upload with biopsyId " + biopsyId + " for Upload type " + submittedPackageType + " for study " + submittedStudy + " already exists.";
+            }
+        } catch (Exception e) {
+            String errorMessage = "Upload with biopsyId " + biopsyId + " for Upload type " + submittedPackageType + " for study " + submittedStudy + " already exists.";
+            logger.logErrorMessage(getClass(), packageId, errorMessage);
+            return "ERROR: Upload with biopsyId " + biopsyId + " for Upload type " + submittedPackageType + " for study " + submittedStudy + " already exists.";
+        }
+        
 	}
 
 	public Package findPackage(String packageId) {

@@ -33,4 +33,10 @@ public class PackageResponseTest {
         assertEquals("globusURL", packageResponse.getGlobusURL());
     }
 
+    @Test
+    public void testSetErrorMessage() {
+        packageResponse.setErrorMessage("errorMessage");
+        assertEquals("errorMessage", packageResponse.getErrorMessage());
+    }
+
 }

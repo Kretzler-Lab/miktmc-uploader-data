@@ -12,4 +12,5 @@ public interface PackageRepository extends MongoRepository<Package, String> {
 
 	public Package findByPackageId(String packageId);
 
+    public Package findByBiopsyIdAndPackageTypeAndStudy(String biopsyId, String packageType, String study);
 }
