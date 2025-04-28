@@ -67,6 +67,7 @@ public class CustomPackageRepository {
 
 	public String saveDynamicForm(JSONObject packageMetadata, User userFromHeader, String packageId)
 			throws JSONException {
+        String biopsyId = packageMetadata.getString(PackageKeys.BIOPSY_ID.getKey());
 		Date startTime = new Date();
 		String submitterEmail = userFromHeader.getEmail();
 		JSONArray files = packageMetadata.getJSONArray(PackageKeys.FILES.getKey());
@@ -77,7 +78,7 @@ public class CustomPackageRepository {
 
 		String studyName = packageMetadata.getString(PackageKeys.STUDY.getKey());
 		StudyFileInfo studyFileInfo = studyFileInfoRepository.findByStudy(studyName);
-		String biopsyId = packageMetadata.getString(PackageKeys.BIOPSY_ID.getKey());
+		
 
 		for (int i = 0; i < files.length(); i++) {
 			JSONObject file = files.getJSONObject(i);
@@ -240,4 +241,8 @@ public class CustomPackageRepository {
 		updateField(packageId, "modifiedBy", shibId);
 		updateField(packageId, "modifications", modifications);
 	}
+
+    public Package findByBiopsyIdAndPackageTypeAndStudy(String biopsyId, String packageType, String study) {
+        return repo.findByBiopsyIdAndPackageTypeAndStudy(biopsyId, packageType, study);
+    }
 }

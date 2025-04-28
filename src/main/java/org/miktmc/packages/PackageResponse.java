@@ -4,6 +4,7 @@ public class PackageResponse {
 
     private String packageId;
     private String globusURL;
+    private String errorMessage;
 
     public String getPackageId() {
         return packageId;
@@ -19,5 +20,13 @@ public class PackageResponse {
 
     public void setGlobusURL(String globusURL) {
         this.globusURL = globusURL;
+    }
+
+    public String getErrorMessage(){
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage){
+        this.errorMessage = errorMessage;
     }
 }
