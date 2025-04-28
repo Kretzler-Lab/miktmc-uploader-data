@@ -11,3 +11,5 @@ New notifications for unauthorized users require latest version of the Notificat
 ### Non-breaking changes
 
 User roles are now sent to front end. 
+
+Duplicate biopsy IDs are not allowed unless they are in a different study or data type
