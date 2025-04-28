@@ -83,7 +83,7 @@ public class PackageController {
 		packageResponse.setPackageId(packageId);
 		logger.logInfoMessage(this.getClass(), packageId, "setting package state", request);
 		packageService.sendStateChangeEvent(packageId, uploadStartedState, null, cleanHostName);
-		JSONObject packageInfo;
+		JSONObject packageInfo = null;
 		try {
 			packageInfo = new JSONObject(packageInfoString);
 			logger.logInfoMessage(this.getClass(), packageId, "Posting package info: " + packageInfo, request);
