@@ -115,7 +115,7 @@ public class PackageService {
         List<Package> myPackage = packageRepository.findByBiopsyIdAndPackageTypeAndStudy(biopsyId, submittedPackageType, submittedStudy);
         
         try {
-            if (myPackage == null) {
+            if (myPackage.isEmpty()) {
                 packageRepository.saveDynamicForm(packageMetadata, user, packageId);
                 Package thePackage = packageRepository.findByPackageId(packageId);
                 return thePackage.getPackageId();
