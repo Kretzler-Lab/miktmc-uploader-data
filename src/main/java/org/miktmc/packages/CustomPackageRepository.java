@@ -242,7 +242,7 @@ public class CustomPackageRepository {
 		updateField(packageId, "modifications", modifications);
 	}
 
-    public Package findByBiopsyIdAndPackageTypeAndStudy(String biopsyId, String packageType, String study) {
+    public List<Package> findByBiopsyIdAndPackageTypeAndStudy(String biopsyId, String packageType, String study) {
         return repo.findByBiopsyIdAndPackageTypeAndStudy(biopsyId, packageType, study);
     }
 }

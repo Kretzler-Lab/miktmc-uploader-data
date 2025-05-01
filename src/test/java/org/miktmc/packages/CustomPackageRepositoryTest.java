@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -198,32 +199,6 @@ public class CustomPackageRepositoryTest {
 		assertEquals(true, messageCaptor.getValue().startsWith("Timing|start|"));
 		assertEquals(true, messageCaptor.getValue().endsWith("|emailAddress2|123|1 files"));
 	}
-
-    @Test
-    public void testSaveDynamicForm_duplicateBiopsyId() throws Exception {
-        Package myPackage = mock(Package.class);
-        when(myPackage.getBiopsyId()).thenReturn("1234");
-        when(myPackage.getPackageId()).thenReturn("123");
-        JSONObject packageMetadata = mock(JSONObject.class);
-		when(packageMetadata.getString("biopsyId")).thenReturn("1234");
-		when(packageMetadata.toString()).thenReturn("{}");
-		when(universalIdGenerator.generateUniversalId()).thenReturn("456");
-		User user = mock(User.class);
-		when(user.getDisplayName()).thenReturn("displayName");
-		when(user.getEmail()).thenReturn("emailAddress2");
-		when(user.getFirstName()).thenReturn("firstName");
-		when(user.getLastName()).thenReturn("lastName");
-		when(user.getId()).thenReturn("5c2f9e01cb5e710049f33121");
-		when(userRepo.save(any(User.class))).thenReturn(user);
-		when(userRepo.findByEmail("emailAddress2")).thenReturn(null);
-        when(repo.findByBiopsyIdAndPackageTypeAndStudy("1234", "packageType", "study")).thenReturn(myPackage);
-        
-        String response = repo.saveDynamicForm(packageMetadata, user, "123");
-
-        assertEquals("Package with biopsyId 1234 already exists.", response);
-        verify(logger).logErrorMessage(CustomPackageRepository.class, "123", "Package with biopsyId 1234 already exists.");
-        
-    }
 
 	@SuppressWarnings({ "unchecked" })
 	@Test

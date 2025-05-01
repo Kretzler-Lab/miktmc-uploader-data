@@ -103,7 +103,7 @@ public class PackageService {
         return successCode;
     }
 
-    public Package findPackageByBiopsyIdAndPackageTypeAndStudy(String biopsyId, String packageType, String study) {
+    public List<Package> findPackageByBiopsyIdAndPackageTypeAndStudy(String biopsyId, String packageType, String study) {
         return packageRepository.findByBiopsyIdAndPackageTypeAndStudy(biopsyId, packageType, study);
     }
 
@@ -112,10 +112,10 @@ public class PackageService {
         String submittedPackageType = packageMetadata.getString(PackageKeys.PACKAGE_TYPE.getKey());
         String submittedStudy = packageMetadata.getString(PackageKeys.STUDY.getKey());
         
-        Package myPackage = packageRepository.findByBiopsyIdAndPackageTypeAndStudy(biopsyId, submittedPackageType, submittedStudy);
+        List<Package> myPackage = packageRepository.findByBiopsyIdAndPackageTypeAndStudy(biopsyId, submittedPackageType, submittedStudy);
         
         try {
-            if (myPackage == null) {
+            if (myPackage.isEmpty()) {
                 packageRepository.saveDynamicForm(packageMetadata, user, packageId);
                 Package thePackage = packageRepository.findByPackageId(packageId);
                 return thePackage.getPackageId();

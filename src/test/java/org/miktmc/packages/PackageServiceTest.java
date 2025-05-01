@@ -139,10 +139,12 @@ public class PackageServiceTest {
 		when(packageMetadata.toString()).thenReturn("{}");
         User user = mock(User.class);
         Package myPackage = new Package();
+        List<Package> packageList = new ArrayList<>();
         myPackage.setPackageId("awesomeNewId");
         myPackage.setBiopsyId("1234");
         myPackage.setPackageType("newPackageType");
-        when(packageRepository.findByBiopsyIdAndPackageTypeAndStudy("1234", "packageType", "study")).thenReturn(myPackage);
+        packageList.add(myPackage);
+        when(packageRepository.findByBiopsyIdAndPackageTypeAndStudy("1234", "packageType", "study")).thenReturn(packageList);
         when(packageRepository.findByPackageId("awesomeNewId")).thenReturn(myPackage);
 
         String packageId = service.savePackageInformation(packageMetadata, user, "awesomeNewId");
@@ -162,7 +164,10 @@ public class PackageServiceTest {
         myPackage.setPackageId("awesomeNewId");
         myPackage.setBiopsyId("1234");
         myPackage.setPackageType("packageType");
-        when(packageRepository.findByBiopsyIdAndPackageTypeAndStudy("1234", "packageType", "study")).thenReturn(myPackage);
+        List<Package> packageList = new ArrayList<>();
+        packageList.add(myPackage);
+    
+        when(packageRepository.findByBiopsyIdAndPackageTypeAndStudy("1234", "packageType", "study")).thenReturn(packageList);
         when(packageRepository.findByPackageId("awesomeNewId")).thenReturn(myPackage);
 
         String error = service.savePackageInformation(packageMetadata, user, "awesomeNewId");
@@ -183,11 +188,13 @@ public class PackageServiceTest {
 	}
 
     @Test
-    public void testFindPackageByBiopsyId() throws Exception {
+    public void testFindPackageByBiopsyIdAndPackageTypeAndStudy() throws Exception {
         Package expectedPackage = mock(Package.class);
-        when(packageRepository.findByBiopsyIdAndPackageTypeAndStudy("1234", "packageType", "study")).thenReturn(expectedPackage);
+        List<Package> expectedPackageList = new ArrayList<>();
+        expectedPackageList.add(expectedPackage);
+        when(packageRepository.findByBiopsyIdAndPackageTypeAndStudy("1234", "packageType", "study")).thenReturn(expectedPackageList);
 
-        Package actualPackage = service.findPackageByBiopsyIdAndPackageTypeAndStudy("1234", "packageType", "study");
+        List<Package> actualPackage = service.findPackageByBiopsyIdAndPackageTypeAndStudy("1234", "packageType", "study");
 
         assertEquals(expectedPackage, actualPackage);
         verify(packageRepository).findByBiopsyIdAndPackageTypeAndStudy("1234", "packageType", "study");
