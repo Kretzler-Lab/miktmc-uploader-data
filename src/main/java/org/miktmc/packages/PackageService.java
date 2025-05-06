@@ -121,14 +121,14 @@ public class PackageService {
                 return thePackage.getPackageId();
     
             }else {
-                String errorMessage = "Package with biopsyId " + biopsyId + " for Upload type " + submittedPackageType + " for study " + submittedStudy + " already exists.";
+                String errorMessage = "DUPLICATE UPLOAD: A " + submittedPackageType + " upload with biopsy ID " + biopsyId + " already exists for the " + submittedStudy + " study.";
                 logger.logErrorMessage(getClass(), packageId, errorMessage);
-                return "ERROR: Upload with biopsyId " + biopsyId + " for Upload type " + submittedPackageType + " for study " + submittedStudy + " already exists.";
+                return errorMessage;
             }
         } catch (Exception e) {
-            String errorMessage = "Upload with biopsyId " + biopsyId + " for Upload type " + submittedPackageType + " for study " + submittedStudy + " already exists.";
+            String errorMessage = "DUPLICATE UPLOAD: A " + submittedPackageType + " upload with biopsy ID " + biopsyId + " already exists for the " + submittedStudy + " study.";
             logger.logErrorMessage(getClass(), packageId, errorMessage);
-            return "ERROR: Upload with biopsyId " + biopsyId + " for Upload type " + submittedPackageType + " for study " + submittedStudy + " already exists.";
+            return errorMessage;
         }
         
 	}

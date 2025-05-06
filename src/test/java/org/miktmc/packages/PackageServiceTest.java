@@ -158,12 +158,14 @@ public class PackageServiceTest {
         JSONObject packageMetadata = mock(JSONObject.class);
         when(packageMetadata.getString("biopsyId")).thenReturn("1234");
         when(packageMetadata.getString("packageType")).thenReturn("packageType");
+        when(packageMetadata.getString("study")).thenReturn("study");
 		when(packageMetadata.toString()).thenReturn("{}");
         User user = mock(User.class);
         Package myPackage = new Package();
         myPackage.setPackageId("awesomeNewId");
         myPackage.setBiopsyId("1234");
         myPackage.setPackageType("packageType");
+        myPackage.setStudy("study");
         List<Package> packageList = new ArrayList<>();
         packageList.add(myPackage);
     
@@ -172,7 +174,7 @@ public class PackageServiceTest {
 
         String error = service.savePackageInformation(packageMetadata, user, "awesomeNewId");
 
-        assertEquals("ERROR: Package with biopsyId 1234 for package type packageType already exists.", error);
+        assertEquals("DUPLICATE UPLOAD: A packageType upload with biopsy ID 1234 already exists for the study study", error);
 
     }
 

@@ -89,7 +89,7 @@ public class PackageController {
 			logger.logInfoMessage(this.getClass(), packageId, "Posting package info: " + packageInfo, request);
 			User user = shibUserService.getUserNoHeaders(request, packageInfo);
 			String response = packageService.savePackageInformation(packageInfo, user, packageId);
-            if(response.contains("ERROR:")) {
+            if(response.contains("DUPLICATE UPLOAD:")) {
                 packageResponse.setErrorMessage(response);
             }else{
                 String largeFilesChecked = packageInfo.optBoolean("largeFilesChecked") ? "true" : "false";
