@@ -3,6 +3,7 @@
 
 ## Release 1.3
 Brief summary of what's in this release:
+* Alert when existing biopsy ID and study ID already exist
 
 ### Breaking changes
 Breaking changes include any database updates needed, if we need to edit any files on system (like .env or certs, etc). Things that are outside of the code itself that need changed for the system to work.
