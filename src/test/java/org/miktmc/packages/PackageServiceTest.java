@@ -118,6 +118,9 @@ public class PackageServiceTest {
 	@Test
 	public void testSavePackageInformation() throws Exception {
 		JSONObject packageMetadata = mock(JSONObject.class);
+        when(packageMetadata.getString("biopsyId")).thenReturn("1234");
+        when(packageMetadata.getString("packageType")).thenReturn("packageType");
+		when(packageMetadata.toString()).thenReturn("{}");
 		User user = mock(User.class);
 		Package myPackage = new Package();
 		myPackage.setPackageId("awesomeNewId");
@@ -126,6 +129,54 @@ public class PackageServiceTest {
 		assertEquals("awesomeNewId", packageId);
 		verify(packageRepository).saveDynamicForm(packageMetadata, user, "awesomeNewId");
 	}
+
+    @Test 
+    public void testSavePackageInformation_duplicateBiopsyId() throws Exception {
+        JSONObject packageMetadata = mock(JSONObject.class);
+        when(packageMetadata.getString("biopsyId")).thenReturn("1234");
+        when(packageMetadata.getString("packageType")).thenReturn("packageType");
+        when(packageMetadata.getString("i-am-different")).thenReturn("i-am-different");
+		when(packageMetadata.toString()).thenReturn("{}");
+        User user = mock(User.class);
+        Package myPackage = new Package();
+        List<Package> packageList = new ArrayList<>();
+        myPackage.setPackageId("awesomeNewId");
+        myPackage.setBiopsyId("1234");
+        myPackage.setPackageType("newPackageType");
+        packageList.add(myPackage);
+        when(packageRepository.findByBiopsyIdAndPackageTypeAndStudy("1234", "packageType", "study")).thenReturn(packageList);
+        when(packageRepository.findByPackageId("awesomeNewId")).thenReturn(myPackage);
+
+        String packageId = service.savePackageInformation(packageMetadata, user, "awesomeNewId");
+
+        assertEquals("awesomeNewId", packageId);
+        verify(packageRepository).saveDynamicForm(packageMetadata, user, "awesomeNewId");
+    }
+
+    @Test
+    public void testSavePackageInformation_duplicateBiopsyIdAndPackageType() throws JSONException {
+        JSONObject packageMetadata = mock(JSONObject.class);
+        when(packageMetadata.getString("biopsyId")).thenReturn("1234");
+        when(packageMetadata.getString("packageType")).thenReturn("packageType");
+        when(packageMetadata.getString("study")).thenReturn("study");
+		when(packageMetadata.toString()).thenReturn("{}");
+        User user = mock(User.class);
+        Package myPackage = new Package();
+        myPackage.setPackageId("awesomeNewId");
+        myPackage.setBiopsyId("1234");
+        myPackage.setPackageType("packageType");
+        myPackage.setStudy("study");
+        List<Package> packageList = new ArrayList<>();
+        packageList.add(myPackage);
+    
+        when(packageRepository.findByBiopsyIdAndPackageTypeAndStudy("1234", "packageType", "study")).thenReturn(packageList);
+        when(packageRepository.findByPackageId("awesomeNewId")).thenReturn(myPackage);
+
+        String error = service.savePackageInformation(packageMetadata, user, "awesomeNewId");
+
+        assertEquals("DUPLICATE UPLOAD: A packageType upload with biopsy ID 1234 already exists for the study study", error);
+
+    }
 
 	@Test
 	public void testFindPackage() throws Exception {
@@ -137,6 +188,19 @@ public class PackageServiceTest {
 		assertEquals(expectedPackage, actualPackage);
 		verify(packageRepository).findByPackageId("packageId");
 	}
+
+    @Test
+    public void testFindPackageByBiopsyIdAndPackageTypeAndStudy() throws Exception {
+        Package expectedPackage = mock(Package.class);
+        List<Package> expectedPackageList = new ArrayList<>();
+        expectedPackageList.add(expectedPackage);
+        when(packageRepository.findByBiopsyIdAndPackageTypeAndStudy("1234", "packageType", "study")).thenReturn(expectedPackageList);
+
+        List<Package> actualPackage = service.findPackageByBiopsyIdAndPackageTypeAndStudy("1234", "packageType", "study");
+
+        assertEquals(expectedPackage, actualPackage);
+        verify(packageRepository).findByBiopsyIdAndPackageTypeAndStudy("1234", "packageType", "study");
+    }
 
 	@Test
 	public void testSaveFile_whenFilenameMetadataJson() throws Exception {

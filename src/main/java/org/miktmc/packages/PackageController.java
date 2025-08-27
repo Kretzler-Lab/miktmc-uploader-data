@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.text.MessageFormat;
 import java.util.List;
-import java.util.Objects;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -84,18 +83,23 @@ public class PackageController {
 		packageResponse.setPackageId(packageId);
 		logger.logInfoMessage(this.getClass(), packageId, "setting package state", request);
 		packageService.sendStateChangeEvent(packageId, uploadStartedState, null, cleanHostName);
-		JSONObject packageInfo;
+		JSONObject packageInfo = null;
 		try {
 			packageInfo = new JSONObject(packageInfoString);
 			logger.logInfoMessage(this.getClass(), packageId, "Posting package info: " + packageInfo, request);
 			User user = shibUserService.getUserNoHeaders(request, packageInfo);
-			packageService.savePackageInformation(packageInfo, user, packageId);
-			String largeFilesChecked = packageInfo.optBoolean("largeFilesChecked") ? "true" : "false";
-			packageService.sendStateChangeEvent(packageId, metadataReceivedState, largeFilesChecked,
-					packageResponse.getGlobusURL(), cleanHostName);
+			String response = packageService.savePackageInformation(packageInfo, user, packageId);
+            if(response.contains("DUPLICATE UPLOAD:")) {
+                packageResponse.setErrorMessage(response);
+            }else{
+                String largeFilesChecked = packageInfo.optBoolean("largeFilesChecked") ? "true" : "false";
+                packageService.sendStateChangeEvent(packageId, metadataReceivedState, largeFilesChecked,
+                packageResponse.getGlobusURL(), cleanHostName);
+            }
 		} catch (Exception e) {
 			logger.logErrorMessage(this.getClass(), packageId, e.getMessage(), request);
 			packageService.sendStateChangeEvent(packageId, uploadFailedState, null, e.getMessage(), cleanHostName);
+            packageResponse.setErrorMessage(e.getMessage());
 		}
 		return packageResponse;
 	}
@@ -200,6 +204,7 @@ public class PackageController {
 		FileUploadResponse fileUploadResponse;
 		String message = finish.format(new Object[] { "Finishing file upload with packageId: ", packageId });
 		logger.logInfoMessage(this.getClass(), packageId, message, request);
+
 		if (packageService.validatePackage(packageId, shibUserService.getUser(request))) {
 			try {
 				packageService.setPackageValidated(packageId);
