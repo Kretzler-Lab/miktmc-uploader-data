@@ -5,9 +5,6 @@ import java.nio.file.FileAlreadyExistsException;
 import java.text.MessageFormat;
 import java.util.List;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,6 +21,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class PackageController {
@@ -102,6 +102,24 @@ public class PackageController {
             packageResponse.setErrorMessage(e.getMessage());
 		}
 		return packageResponse;
+	}
+
+	@RequestMapping(value = "/v1/packages/{packageId}/edit", method = RequestMethod.POST)
+	public @ResponseBody String editPackage(@PathVariable("packageId") String packageId, @RequestBody String packageInfoString, HttpServletRequest request) {
+		JSONObject packageInfo;
+		String result = null;
+		HttpSession session = request.getSession(false);
+		String shibId = "";
+		if (session != null) {
+			shibId = (String)session.getAttribute("shibid");
+		}
+		try {
+			packageInfo = new JSONObject(packageInfoString);
+			result = packageService.editPackage(packageId, packageInfo, shibId);
+		} catch (Exception e) {
+			logger.logErrorMessage(this.getClass(), packageId, e.getMessage(), request);
+		}
+		return result;
 	}
 
 	@RequestMapping(value = "/v1/packages/{packageId}/files/add", method = RequestMethod.POST)
