@@ -3,7 +3,13 @@ package org.miktmc.packages;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.io.FilenameUtils;
 import org.json.JSONArray;
@@ -135,6 +141,15 @@ public class PackageService {
 
 	public Package findPackage(String packageId) {
 		return packageRepository.findByPackageId(packageId);
+	}
+
+	public String editPackage(String packageId, JSONObject packageInfo, String shibId) {
+		for(String key : packageInfo.keySet()) {
+			Object value = packageInfo.get(key);
+			packageRepository.updateField(packageId, key, value);
+		}
+		packageRepository.addModification(packageId, shibId, "EDIT");
+		return packageId;
 	}
 
 	public void saveFile(MultipartFile file, String packageId, String filename, String study, boolean shouldAppend) throws Exception {
