@@ -46,11 +46,13 @@ public class PackageServiceTest {
 	@Mock
 	private StateHandlerService stateHandlerService;
 	private AutoCloseable mocks;
+    @Mock 
+    private StudyFileInfoRepository studyFileInfoRepository;
 
 	@BeforeEach
 	public void setUp() throws Exception {
 		mocks = MockitoAnnotations.openMocks(this);
-		service = new PackageService(packageFileHandler, filePathHelper, packageRepository, stateHandlerService, logger);
+		service = new PackageService(packageFileHandler, filePathHelper, packageRepository, stateHandlerService, logger, studyFileInfoRepository);
 		ReflectionTestUtils.setField(service, "uploadSucceededState", "UPLOAD_SUCCEEDED");
 		ReflectionTestUtils.setField(service, "packageTypeToExclude", "Electron Microscopy Imaging");
         ReflectionTestUtils.setField(service, "basePath", "/data/dataLake");
