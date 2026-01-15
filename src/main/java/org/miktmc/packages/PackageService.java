@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,16 +43,18 @@ public class PackageService {
 	private StateHandlerService stateHandler;
 	@Value("${packageType.exclusions}")
 	private String packageTypeToExclude;
+    private StudyFileInfoRepository studyFileInfoRepository;
 
 	@Autowired
 	public PackageService(PackageFileHandler packageFileHandler, FilePathHelper filePathHelper,
 						  CustomPackageRepository packageRepository, StateHandlerService stateHandler,
-						  LoggingService logger) {
+						  LoggingService logger, StudyFileInfoRepository studyFileInfoRepository) {
 		this.filePathHelper = filePathHelper;
 		this.packageFileHandler = packageFileHandler;
 		this.packageRepository = packageRepository;
 		this.stateHandler = stateHandler;
 		this.logger = logger;
+        this.studyFileInfoRepository = studyFileInfoRepository;
 	}
 
 	public List<PackageView> findAllPackages() throws JSONException, IOException {
@@ -144,6 +147,30 @@ public class PackageService {
 	}
 
 	public String editPackage(String packageId, JSONObject packageInfo, String shibId) {
+        Package thePackage = packageRepository.findByPackageId(packageId);
+        String newBiopsyId = packageInfo.getString("biopsyId");
+        if (!thePackage.getBiopsyId().equals(newBiopsyId)) {
+            StudyFileInfo studyFileInfo = studyFileInfoRepository.findByStudy(thePackage.getStudy());
+            List<Attachment> files = thePackage.getAttachments();
+            for (Attachment file : files){
+                String oldFileName = file.getFileName();
+                String fileExtension = FilenameUtils.getExtension(oldFileName);
+                int studyFileCount = studyFileInfo.getFileCounter();
+                String newFileName = newBiopsyId + "_" + studyFileInfo.getUploadSourceLetter() + "_"+studyFileCount+"." + fileExtension;
+                String filePath = filePathHelper.getFilePath(packageId, thePackage.getStudy(), oldFileName);
+                String newFilePath = filePathHelper.getFilePath(packageId, thePackage.getStudy(), newFileName);
+                File oldFile = new File(filePath);
+                file.setFileName(newFileName);
+                try {
+                    FileUtils.moveFile(oldFile, new File(newFilePath));
+                }catch (Exception e){
+                    logger.logErrorMessage(getClass(), packageId, "Error renaming file " + oldFileName + " to " + newFileName + "due to " + e.getMessage());
+                }
+                studyFileInfo.setFileCounter(++studyFileCount);
+            }
+            packageRepository.updateField(packageId, "files", files);
+        }
+
 		for(String key : packageInfo.keySet()) {
 			Object value = packageInfo.get(key);
 			packageRepository.updateField(packageId, key, value);
