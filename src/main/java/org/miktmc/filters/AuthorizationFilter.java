@@ -10,7 +10,6 @@ import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -85,10 +84,9 @@ public class AuthorizationFilter implements Filter {
 		HttpServletRequest request = (HttpServletRequest) incomingRequest;
 		HttpServletResponse response = (HttpServletResponse) incomingResponse;
 
-		Cookie[] cookies = request.getCookies();
 		User user = shibUserService.getUser(request);
 		String shibId = user.getShibId();
-		if (hasExistingSession(user, shibId, cookies, request) || allowedEndpoints.contains(request.getRequestURI()) || !isFirstFilePartUpload(request)) {
+		if (allowedEndpoints.contains(request.getRequestURI()) || !isFirstFilePartUpload(request)) {
 
 			chain.doFilter(request, response);
 		} else if (shibId != null && !shibId.isEmpty()) {
@@ -167,53 +165,6 @@ public class AuthorizationFilter implements Filter {
 		logger.logErrorMessage(this.getClass(), null, errorMessage, request);
 		response.setStatus(status.value());
 
-	}
-
-	private boolean hasExistingSession(User user, String shibId, Cookie[] cookies, HttpServletRequest request) {
-		HttpSession existingSession = request.getSession(false);
-		if (existingSession != null) {
-			logger.logInfoMessage(this.getClass(), user, null, request.getRequestURI(),
-					"checking for existing session");
-            if (!rolesMatch(existingSession, user)) {
-                return false;
-            }
-			if (existingSession.getAttribute("shibid") != null
-					&& existingSession.getAttribute("shibid").equals(user.getShibId())) {
-				logger.logWarnMessage(this.getClass(), user, null, request.getRequestURI(),
-						"skipping filter, active session");
-				return true;
-			} else {
-				return false;
-			}
-		}
-		return false;
-
-	}
-
-	private boolean rolesMatch(HttpSession session, User user) {
-		Object sessionRolesAttr = session.getAttribute("roles");
-		if (sessionRolesAttr == null) {
-			return true;
-		}
-		if (!(sessionRolesAttr instanceof JSONArray)) {
-			return false;
-		}
-		JSONArray sessionRoles = (JSONArray) sessionRolesAttr;
-		List<String> userRoles = user.getRoles();
-		if (sessionRoles.length() != (userRoles != null ? userRoles.size() : 0)) {
-			return false;
-		}
-		try {
-			for (int i = 0; i < sessionRoles.length(); i++) {
-				if (!userRoles.contains(sessionRoles.getString(i))) {
-					return false;
-				}
-			}
-			return true;
-		} catch (JSONException e) {
-            logger.logErrorMessage(this.getClass(), null, "Error comparing session roles to user roles: " + e.getMessage());
-			return false;
-		}
 	}
 
 	@Override
